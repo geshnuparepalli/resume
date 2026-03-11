@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Geshnu Venkatesh Parepalli — Operations & Supply Chain</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --accent: #e8ff47;
+    --accent2: #47c8ff;
+    --accent3: #ff6b47;
+    --text: #f0f0f0;
+    --muted: #666666;
+    --border: #222222;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease, width 0.2s, height 0.2s;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(232,255,71,0.4);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.08s linear, width 0.2s, height 0.2s, opacity 0.2s;
+    transform: translate(-50%, -50%);
+  }
+  body:has(a:hover) .cursor, body:has(button:hover) .cursor { width: 20px; height: 20px; }
+  body:has(a:hover) .cursor-ring, body:has(button:hover) .cursor-ring { width: 56px; height: 56px; opacity: 0.6; }
+
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1000; opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 24px 48px;
+    background: linear-gradient(to bottom, rgba(10,10,10,0.95), transparent);
+    backdrop-filter: blur(2px);
+  }
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 18px;
+    letter-spacing: -0.5px;
+    color: var(--accent);
+  }
+  .nav-links { display: flex; gap: 40px; }
+  .nav-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 120px 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(232,255,71,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,255,71,0.03) 1px, transparent 1px);
+    background-size: 80px 80px;
+    animation: gridShift 20s linear infinite;
+  }
+  @keyframes gridShift { 0% { transform: translateY(0); } 100% { transform: translateY(80px); } }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(232,255,71,0.06) 0%, transparent 70%);
+    top: -100px; right: -100px;
+    animation: glowPulse 4s ease-in-out infinite;
+  }
+  .hero-glow2 {
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(71,200,255,0.05) 0%, transparent 70%);
+    bottom: 0; left: 200px;
+    animation: glowPulse 6s ease-in-out infinite reverse;
+  }
+  @keyframes glowPulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.1); } }
+
+  .hero-content { position: relative; z-index: 2; max-width: 900px; }
+
+  .hero-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(232,255,71,0.3);
+    display: inline-block;
+    padding: 6px 14px;
+    margin-bottom: 32px;
+    animation: fadeSlideUp 0.6s ease both;
+  }
+
+  .hero-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(52px, 8vw, 110px);
+    line-height: 0.95;
+    letter-spacing: -3px;
+    margin-bottom: 24px;
+    animation: fadeSlideUp 0.6s 0.1s ease both;
+  }
+  .hero-name span { color: var(--accent); }
+  .hero-name .line2 { color: var(--muted); font-weight: 400; }
+
+  .hero-desc {
+    font-size: 18px; line-height: 1.7;
+    color: #999; max-width: 540px;
+    margin-bottom: 48px;
+    animation: fadeSlideUp 0.6s 0.2s ease both;
+  }
+
+  .hero-actions {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    animation: fadeSlideUp 0.6s 0.3s ease both;
+  }
+  .btn-primary {
+    background: var(--accent); color: #000;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 13px;
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 14px 32px;
+    border: none; text-decoration: none;
+    display: inline-block;
+    transition: transform 0.2s, box-shadow 0.2s;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(232,255,71,0.3); }
+
+  .btn-secondary {
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-weight: 600; font-size: 13px;
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 14px 32px;
+    text-decoration: none;
+    display: inline-block;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .hero-stats {
+    position: absolute; right: 48px; bottom: 80px;
+    display: flex; flex-direction: column; gap: 32px;
+    z-index: 2;
+    animation: fadeSlideUp 0.6s 0.4s ease both;
+  }
+  .stat { text-align: right; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 42px;
+    line-height: 1; color: var(--text);
+  }
+  .stat-num span { color: var(--accent); }
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--muted);
+  }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SECTION BASE */
+  section { padding: 100px 48px; position: relative; }
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::after {
+    content: ''; flex: 1; max-width: 60px;
+    height: 1px; background: var(--accent); opacity: 0.4;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: clamp(32px, 5vw, 56px);
+    line-height: 1.05; letter-spacing: -2px;
+    margin-bottom: 60px;
+  }
+
+  /* ABOUT */
+  #about { background: var(--surface); }
+  .about-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 80px; align-items: start;
+  }
+  .about-text p {
+    font-size: 17px; line-height: 1.8; color: #aaa;
+    margin-bottom: 20px;
+  }
+  .about-text p strong { color: var(--text); font-weight: 500; }
+  .about-text p .highlight { color: var(--accent); font-weight: 500; }
+
+  .about-details { display: flex; flex-direction: column; gap: 0; }
+  .detail-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .detail-row:first-child { border-top: 1px solid var(--border); }
+  .detail-key {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .detail-val { font-size: 14px; color: var(--text); text-align: right; }
+  .detail-val.accent { color: var(--accent); }
+
+  /* EXPERIENCE */
+  #experience { background: var(--bg); }
+  .exp-list { display: flex; flex-direction: column; gap: 2px; }
+  .exp-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 36px 40px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+    cursor: default;
+  }
+  .exp-item::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px; background: var(--accent);
+    transform: scaleY(0); transform-origin: bottom;
+    transition: transform 0.3s ease;
+  }
+  .exp-item:hover { border-color: rgba(232,255,71,0.2); transform: translateX(4px); }
+  .exp-item:hover::before { transform: scaleY(1); }
+
+  .exp-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .exp-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 20px;
+  }
+  .exp-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 1px;
+    color: var(--muted); white-space: nowrap; margin-left: 20px;
+  }
+  .exp-company { color: var(--accent); font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+  .exp-location { color: var(--muted); font-size: 12px; font-family: 'DM Mono', monospace; margin-bottom: 16px; }
+  .exp-note {
+    font-size: 12px; color: #666; font-style: italic;
+    background: rgba(232,255,71,0.04);
+    border-left: 2px solid rgba(232,255,71,0.2);
+    padding: 8px 12px; margin-bottom: 16px;
+  }
+  .exp-bullets { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .exp-bullets li {
+    font-size: 14px; color: #999; line-height: 1.6;
+    padding-left: 16px; position: relative;
+  }
+  .exp-bullets li::before {
+    content: '→'; position: absolute; left: 0;
+    color: var(--accent); font-size: 12px;
+  }
+  .exp-bullets li strong { color: var(--text); font-weight: 500; }
+
+  .exp-toggle {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+    padding: 8px 16px; cursor: none;
+    margin-top: 16px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .exp-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .exp-bullets.collapsed { display: none; }
+
+  /* PROJECTS */
+  #projects { background: var(--surface); }
+  .projects-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .project-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 36px 32px;
+    position: relative; overflow: hidden;
+    transition: transform 0.3s, border-color 0.3s;
+    display: flex; flex-direction: column;
+  }
+  .project-card::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 2px;
+    transition: opacity 0.3s;
+    opacity: 0;
+  }
+  .project-card:nth-child(1)::after { background: var(--accent); }
+  .project-card:nth-child(2)::after { background: var(--accent2); }
+  .project-card:nth-child(3)::after { background: var(--accent3); }
+  .project-card:hover { transform: translateY(-6px); border-color: #333; }
+  .project-card:hover::after { opacity: 1; }
+
+  .project-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 48px;
+    opacity: 0.06; position: absolute;
+    top: 20px; right: 24px; line-height: 1;
+  }
+  .project-icon {
+    font-size: 28px; margin-bottom: 20px;
+  }
+  .project-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 10px; display: inline-block;
+    margin-bottom: 16px;
+    border-radius: 2px;
+  }
+  .project-card:nth-child(1) .project-tag { background: rgba(232,255,71,0.1); color: var(--accent); }
+  .project-card:nth-child(2) .project-tag { background: rgba(71,200,255,0.1); color: var(--accent2); }
+  .project-card:nth-child(3) .project-tag { background: rgba(255,107,71,0.1); color: var(--accent3); }
+
+  .project-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 20px;
+    margin-bottom: 12px; line-height: 1.2;
+  }
+  .project-desc { font-size: 14px; color: #888; line-height: 1.7; margin-bottom: 24px; flex: 1; }
+  .project-tech {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 24px;
+  }
+  .tech-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+  }
+  .project-relevance {
+    font-size: 12px; color: #666;
+    border-top: 1px solid var(--border);
+    padding-top: 16px; margin-top: auto;
+    font-style: italic;
+  }
+
+  /* SKILLS */
+  #skills { background: var(--bg); }
+  .skills-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  .skill-group { }
+  .skill-group-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 14px;
+    color: var(--text); margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .skill-group-title::before {
+    content: ''; width: 20px; height: 2px;
+  }
+  .skill-group:nth-child(1) .skill-group-title::before { background: var(--accent); }
+  .skill-group:nth-child(2) .skill-group-title::before { background: var(--accent2); }
+  .skill-group:nth-child(3) .skill-group-title::before { background: var(--accent3); }
+
+  .skill-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .skill-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 0.5px;
+    color: #888; border: 1px solid var(--border);
+    padding: 7px 14px;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+  .skill-tag:hover { border-color: var(--accent); color: var(--accent); background: rgba(232,255,71,0.04); }
+
+  /* LANGUAGES */
+  .languages-row {
+    display: flex; gap: 24px; flex-wrap: wrap;
+    margin-top: 60px;
+  }
+  .lang-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px 28px; flex: 1; min-width: 160px;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .lang-card:hover { border-color: rgba(232,255,71,0.3); }
+  .lang-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 18px; margin-bottom: 4px;
+  }
+  .lang-level { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .lang-score {
+    position: absolute; top: 20px; right: 20px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 24px; color: var(--accent);
+    opacity: 0.5;
+  }
+
+  /* EDUCATION */
+  #education { background: var(--surface); }
+  .edu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .edu-card {
+    background: var(--bg); border: 1px solid var(--border);
+    padding: 36px 32px; position: relative; overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .edu-card:hover { border-color: rgba(232,255,71,0.2); }
+  .edu-degree {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 20px; margin-bottom: 8px;
+  }
+  .edu-school { color: var(--accent); font-size: 14px; margin-bottom: 6px; }
+  .edu-dates {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--muted); letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+  .edu-note { font-size: 13px; color: #666; font-style: italic; line-height: 1.6; }
+
+  /* CONTACT */
+  #contact {
+    background: var(--bg);
+    text-align: center;
+  }
+  .contact-inner { max-width: 600px; margin: 0 auto; }
+  .contact-big {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: clamp(40px, 6vw, 72px);
+    line-height: 1; letter-spacing: -2px; margin-bottom: 32px;
+  }
+  .contact-big span { color: var(--accent); }
+  .contact-links {
+    display: flex; flex-direction: column; gap: 16px;
+    align-items: center; margin-bottom: 48px;
+  }
+  .contact-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px; color: var(--muted);
+    text-decoration: none; letter-spacing: 1px;
+    display: flex; align-items: center; gap: 12px;
+    transition: color 0.2s;
+  }
+  .contact-link:hover { color: var(--accent); }
+  .contact-link .icon { font-size: 16px; }
+
+  .available-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(232,255,71,0.08);
+    border: 1px solid rgba(232,255,71,0.2);
+    padding: 10px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--accent);
+  }
+  .available-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    animation: blink 2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+  /* FOOTER */
+  footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 24px 48px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--muted); letter-spacing: 1px;
+  }
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 14px; color: var(--accent);
+  }
+
+  /* SCROLL REVEAL */
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    nav { padding: 20px 24px; }
+    .nav-links { display: none; }
+    section { padding: 70px 24px; }
+    .hero { padding: 100px 24px 80px; }
+    .hero-stats { display: none; }
+    .about-grid, .projects-grid, .skills-grid, .edu-grid { grid-template-columns: 1fr; }
+    .hero-name { font-size: 48px; letter-spacing: -2px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">GVP</div>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#experience">Experience</a>
+    <a href="#projects">Projects</a>
+    <a href="#skills">Skills</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Available for immediate start · London, UK</div>
+    <h1 class="hero-name">
+      Geshnu<br>
+      <span>Venkatesh</span><br>
+      <span class="line2">Parepalli</span>
+    </h1>
+    <p class="hero-desc">Operations & Supply Chain Manager specialising in FMCG distribution, logistics optimisation, and building lean B2B operations from the ground up.</p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn-primary">Get In Touch</a>
+      <a href="#experience" class="btn-secondary">View Experience</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">8<span>+</span></div>
+      <div class="stat-label">Years Experience</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">70<span>%</span></div>
+      <div class="stat-label">Revenue Growth</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">15<span>+</span></div>
+      <div class="stat-label">Suppliers Managed</div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-label">01 — About</div>
+  <h2 class="section-title">Who I Am</h2>
+  <div class="about-grid">
+    <div class="about-text reveal">
+      <p>I'm an operations professional who builds things that <strong>actually work</strong> — from turning around struggling businesses to <span class="highlight">founding my own B2B supply chain operation</span> in London that undercuts established distributors through smart sourcing and route optimisation.</p>
+      <p>My background spans <strong>FMCG, logistics, dairy manufacturing, and tech-enabled operations</strong>. I've managed P&L, led teams, negotiated with 15+ suppliers, and cut costs at every level — not by luck, but by understanding every link in the chain.</p>
+      <p>I hold an <strong>MSc in Management from Coventry University</strong> (2025) and a BCom with a computer applications specialism — meaning I can bridge the gap between <span class="highlight">operational strategy and technical implementation</span>.</p>
+      <p>I speak English, Telugu, Hindi, and conversational Japanese — yes, self-taught from anime.</p>
+    </div>
+    <div class="about-details reveal reveal-delay-1">
+      <div class="detail-row"><span class="detail-key">Location</span><span class="detail-val">London, United Kingdom</span></div>
+      <div class="detail-row"><span class="detail-key">Phone</span><span class="detail-val">07901369619</span></div>
+      <div class="detail-row"><span class="detail-key">Email</span><span class="detail-val" style="font-size:12px">parepalligeshnuvenkatesh@gmail.com</span></div>
+      <div class="detail-row"><span class="detail-key">Education</span><span class="detail-val">MSc Management, Coventry</span></div>
+      <div class="detail-row"><span class="detail-key">Right to Work</span><span class="detail-val accent">✓ United Kingdom</span></div>
+      <div class="detail-row"><span class="detail-key">Availability</span><span class="detail-val accent">Immediate</span></div>
+      <div class="detail-row"><span class="detail-key">Target Roles</span><span class="detail-val" style="font-size:12px">Ops Manager · Supply Chain · Logistics</span></div>
+      <div class="detail-row"><span class="detail-key">IELTS</span><span class="detail-val">6.5 (B2 Upper Intermediate)</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-label">02 — Experience</div>
+  <h2 class="section-title">Where I've Worked</h2>
+  <div class="exp-list">
+
+    <div class="exp-item reveal">
+      <div class="exp-header">
+        <div>
+          <div class="exp-title">Founder & Operations Lead</div>
+          <div class="exp-company">Geshnu General Services Ltd</div>
+          <div class="exp-location">📍 London, UK</div>
+        </div>
+        <div class="exp-date">Jun 2025 — Present</div>
+      </div>
+      <ul class="exp-bullets">
+        <li>Founded a B2B fresh produce supply chain business; manage <strong>end-to-end logistics</strong> including vendor sourcing, inventory, route planning, and time-critical delivery</li>
+        <li>Winning accounts by delivering <strong>10–15% cost savings</strong> versus established distributors through direct sourcing and route optimisation</li>
+        <li>Manage all financial operations: invoicing, cash flow forecasting, supplier payment terms, and monthly P&L tracking</li>
+        <li>Maintained <strong>100% on-time delivery rate</strong> across all client accounts</li>
+      </ul>
+    </div>
+
+    <div class="exp-item reveal">
+      <div class="exp-header">
+        <div>
+          <div class="exp-title">Business Development & Pre-Launch Planning</div>
+          <div class="exp-company">Self-Employed</div>
+          <div class="exp-location">📍 London, UK</div>
+        </div>
+        <div class="exp-date">Mar 2025 — Jun 2025</div>
+      </div>
+      <div class="exp-note">Dedicated period of market research, supplier outreach, business registration, and operational planning prior to formally launching Geshnu General Services Ltd.</div>
+      <ul class="exp-bullets">
+        <li>Conducted market research and competitor analysis across London fresh produce distribution</li>
+        <li>Built supplier network and negotiated initial terms; developed route planning and delivery frameworks</li>
+        <li>Completed all business registration, compliance, and financial setup requirements</li>
+      </ul>
+    </div>
+
+    <div class="exp-item reveal">
+      <div class="exp-header">
+        <div>
+          <div class="exp-title">Assistant Operations Manager</div>
+          <div class="exp-company">Super Club Roma</div>
+          <div class="exp-location">📍 London, UK</div>
+        </div>
+        <div class="exp-date">Apr 2024 — Mar 2025</div>
+      </div>
+      <ul class="exp-bullets">
+        <li>Managed procurement and supplier relationships across <strong>8+ vendor accounts</strong></li>
+        <li>Reduced stock wastage by <strong>15%</strong> through tighter inventory controls and stock rotation procedures</li>
+        <li>Cut monthly overheads by <strong>10%</strong> through operational expenditure analysis</li>
+        <li>Coordinated cross-functional teams including finance, logistics, and operations</li>
+        <li>Maintained operational records, compliance documentation, and audit preparation</li>
+      </ul>
+    </div>
+
+    <div class="exp-item reveal">
+      <div class="exp-header">
+        <div>
+          <div class="exp-title">Operations Management Placement</div>
+          <div class="exp-company">Potru Ltd</div>
+          <div class="exp-location">📍 London, UK</div>
+        </div>
+        <div class="exp-date">Sep 2023 — Mar 2024</div>
+      </div>
+      <div class="exp-note">Completed as a mandatory industry placement module as part of MSc Management at Coventry University.</div>
+      <ul class="exp-bullets">
+        <li>Managed B2B contract administration, shipping coordination, and payment processing across multiple international accounts</li>
+        <li>Acted as primary liaison between sales, operations, and international offices</li>
+        <li>Identified and implemented process improvements, reducing bottlenecks between sales and fulfilment</li>
+      </ul>
+    </div>
+
+    <div class="exp-item reveal">
+      <div class="exp-header">
+        <div>
+          <div class="exp-title">Operations & General Manager</div>
+          <div class="exp-company">Sun Enterprises</div>
+          <div class="exp-location">📍 Hyderabad, India</div>
+        </div>
+        <div class="exp-date">Dec 2019 — Dec 2022</div>
+      </div>
+      <div class="exp-note">Joined at founding of early-stage family startup. Operated full-time with academic institution approval while completing BCom.</div>
+      <ul class="exp-bullets">
+        <li>Increased revenue by <strong>70%</strong> and reduced stockouts by <strong>30%</strong> through improved procurement and inventory systems</li>
+        <li>Full P&L responsibility — reduced outstanding debts by <strong>40%</strong> within 12 months</li>
+        <li>Cut operational costs by <strong>20%</strong> through logistics and process streamlining</li>
+        <li>Built and managed a team of <strong>8 staff</strong>; negotiated contracts with <strong>15+ suppliers</strong></li>
+      </ul>
+    </div>
+
+    <div class="exp-item reveal">
+      <div class="exp-header">
+        <div>
+          <div class="exp-title">Operations Manager</div>
+          <div class="exp-company">Masqati Dairy Products Pvt Ltd</div>
+          <div class="exp-location">📍 Hyderabad, India</div>
+        </div>
+        <div class="exp-date">Aug 2015 — Aug 2017</div>
+      </div>
+      <ul class="exp-bullets">
+        <li>Managed daily production and operational workflows across a dairy manufacturing facility</li>
+        <li>Supported workforce scheduling for a team of <strong>20+</strong>, improving production floor efficiency</li>
+        <li>Maintained supplier and client relationships within agreed SLA timeframes</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-label">03 — Projects</div>
+  <h2 class="section-title">Technical Work</h2>
+  <div class="projects-grid">
+
+    <div class="project-card reveal">
+      <div class="project-num">01</div>
+      <div class="project-icon">📦</div>
+      <span class="project-tag">Python</span>
+      <h3 class="project-title">Inventory Stock Tracker</h3>
+      <p class="project-desc">A command-line inventory management tool built in Python. Tracks stock levels across multiple SKUs, flags items below reorder threshold, and generates basic reorder reports in CSV format. Designed around real-world supply chain logic.</p>
+      <div class="project-tech">
+        <span class="tech-pill">Python 3</span>
+        <span class="tech-pill">CSV I/O</span>
+        <span class="tech-pill">Data Structures</span>
+        <span class="tech-pill">CLI Interface</span>
+      </div>
+      <p class="project-relevance">💡 Built to mirror the stock management challenges faced at Sun Enterprises — where stockout reduction was a key operational goal.</p>
+    </div>
+
+    <div class="project-card reveal reveal-delay-1">
+      <div class="project-num">02</div>
+      <div class="project-icon">📊</div>
+      <span class="project-tag">SAP + Excel</span>
+      <h3 class="project-title">Operations KPI Dashboard</h3>
+      <p class="project-desc">An Excel-based operations dashboard simulating SAP data entry workflows. Tracks key operational KPIs including stock levels, purchase orders, supplier performance, and cost variance. Includes automated conditional formatting for alerts.</p>
+      <div class="project-tech">
+        <span class="tech-pill">Microsoft Excel</span>
+        <span class="tech-pill">SAP Concepts</span>
+        <span class="tech-pill">KPI Reporting</span>
+        <span class="tech-pill">Data Visualisation</span>
+      </div>
+      <p class="project-relevance">💡 Directly applicable to FMCG operations reporting — mirrors the kind of dashboards used in supply chain management roles.</p>
+    </div>
+
+    <div class="project-card reveal reveal-delay-2">
+      <div class="project-num">03</div>
+      <div class="project-icon">⚙️</div>
+      <span class="project-tag">C Language</span>
+      <h3 class="project-title">Data Sorting & Calculator</h3>
+      <p class="project-desc">A C program implementing multiple sorting algorithms (bubble, selection) and a multi-function calculator. Demonstrates understanding of logic structures, loops, arrays, and memory management — foundational programming concepts from BCom Computer Applications.</p>
+      <div class="project-tech">
+        <span class="tech-pill">C Language</span>
+        <span class="tech-pill">Sorting Algorithms</span>
+        <span class="tech-pill">Memory Management</span>
+        <span class="tech-pill">Logic Structures</span>
+      </div>
+      <p class="project-relevance">💡 Shows technical foundation and analytical thinking — reinforces ability to understand and work with data-driven operational tools.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-label">04 — Skills</div>
+  <h2 class="section-title">What I Bring</h2>
+  <div class="skills-grid">
+    <div class="skill-group reveal">
+      <div class="skill-group-title">Operations & Logistics</div>
+      <div class="skill-tags">
+        <span class="skill-tag">Supply Chain Management</span>
+        <span class="skill-tag">Inventory & Stock Control</span>
+        <span class="skill-tag">Vendor Management</span>
+        <span class="skill-tag">Route Optimisation</span>
+        <span class="skill-tag">Last-Mile Delivery</span>
+        <span class="skill-tag">Procurement</span>
+        <span class="skill-tag">Demand Planning</span>
+        <span class="skill-tag">Logistics Coordination</span>
+      </div>
+    </div>
+    <div class="skill-group reveal reveal-delay-1">
+      <div class="skill-group-title">Finance & Reporting</div>
+      <div class="skill-tags">
+        <span class="skill-tag">P&L Management</span>
+        <span class="skill-tag">Budget Forecasting</span>
+        <span class="skill-tag">Credit Control</span>
+        <span class="skill-tag">Audit Preparation</span>
+        <span class="skill-tag">KPI & SLA Reporting</span>
+        <span class="skill-tag">Cost Reduction</span>
+        <span class="skill-tag">Financial Reporting</span>
+      </div>
+    </div>
+    <div class="skill-group reveal reveal-delay-2">
+      <div class="skill-group-title">Business & Technical</div>
+      <div class="skill-tags">
+        <span class="skill-tag">B2B Account Management</span>
+        <span class="skill-tag">Contract Management</span>
+        <span class="skill-tag">Stakeholder Management</span>
+        <span class="skill-tag">Process Improvement</span>
+        <span class="skill-tag">SAP (ERP)</span>
+        <span class="skill-tag">Python</span>
+        <span class="skill-tag">Microsoft Excel</span>
+        <span class="skill-tag">CRM Systems</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="languages-row">
+    <div class="lang-card reveal">
+      <div class="lang-name">English</div>
+      <div class="lang-level">Professional · IELTS 6.5 (B2)</div>
+      <div class="lang-score">B2</div>
+    </div>
+    <div class="lang-card reveal reveal-delay-1">
+      <div class="lang-name">Telugu</div>
+      <div class="lang-level">Native Speaker</div>
+      <div class="lang-score">C2</div>
+    </div>
+    <div class="lang-card reveal reveal-delay-2">
+      <div class="lang-name">Hindi</div>
+      <div class="lang-level">Fluent · Second Language</div>
+      <div class="lang-score">C1</div>
+    </div>
+    <div class="lang-card reveal reveal-delay-3">
+      <div class="lang-name">Japanese</div>
+      <div class="lang-level">Conversational · Self-taught</div>
+      <div class="lang-score">A2</div>
+    </div>
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education">
+  <div class="section-label">05 — Education</div>
+  <h2 class="section-title">Academic Background</h2>
+  <div class="edu-grid">
+    <div class="edu-card reveal">
+      <div class="edu-degree">MSc Management</div>
+      <div class="edu-school">Coventry University, United Kingdom</div>
+      <div class="edu-dates">January 2023 — January 2025</div>
+      <div class="edu-note">Includes mandatory industry placement at Potru Ltd (Sep 2023 – Mar 2024) as part of course requirements. Focus on operations management, supply chain strategy, and business leadership.</div>
+    </div>
+    <div class="edu-card reveal reveal-delay-1">
+      <div class="edu-degree">BCom — Computer & Information Sciences</div>
+      <div class="edu-school">Avinash College of Commerce, India</div>
+      <div class="edu-dates">July 2017 — August 2021</div>
+      <div class="edu-note">Computer applications specialism covering SAP, Python, C language, and data systems. Operated Sun Enterprises full-time alongside studies with academic institution approval.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-inner">
+    <div class="section-label" style="justify-content:center">06 — Contact</div>
+    <h2 class="contact-big reveal">Let's<br><span>Work Together</span></h2>
+    <div class="available-badge reveal">
+      <div class="available-dot"></div>
+      Available for immediate start
+    </div>
+    <div class="contact-links reveal" style="margin-top:32px">
+      <a href="tel:07901369619" class="contact-link"><span class="icon">📱</span> 07901369619</a>
+      <a href="mailto:parepalligeshnuvenkatesh@gmail.com" class="contact-link"><span class="icon">✉️</span> parepalligeshnuvenkatesh@gmail.com</a>
+      <a href="https://linkedin.com/in/geshnuvenkatesh-parepalli-94a635263" target="_blank" class="contact-link"><span class="icon">💼</span> linkedin.com/in/geshnuvenkatesh-parepalli-94a635263</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-text">© 2026 Geshnu Venkatesh Parepalli · London, UK</div>
+  <div class="footer-logo">GVP</div>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  function animateCursor() {
+    cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+    rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  reveals.forEach(r => observer.observe(r));
+
+  // Active nav
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--accent)' : '';
+    });
+  });
+</script>
+</body>
+</html>
